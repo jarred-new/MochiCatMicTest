@@ -1,0 +1,43 @@
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 7px;
+  background: #befefe;
+  z-index: 10;                /* Keeps header on top of the image */
+  box-sizing: border-box;     /* Prevents padding from causing horizontal scroll */
+}
+
+.levelHeaderClass {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 8px;
+  background: #befefe;
+  z-index: 10;                /* Keeps footer on top of the image */
+  box-sizing: border-box;     /* Prevents padding from causing horizontal scroll */
+}
+
+.catClass {
+  display: flex;            
+  justify-content: center;  /* Centers horizontally */
+  align-items: center;      /* Centers vertically */
+  
+  width: 100%;              /* Takes full width of screen */
+  min-height: 100vh;        /* Spans full height of view */
+  box-sizing: border-box;
+
+  /* Padding keeps the cat image from hiding under your fixed bars */
+  padding-top: 50px;        
+  padding-bottom: 50px;     
+}
+
+img {
+  max-width: 90%;          /* Allows image to be wider on phone screens */
+  max-height: 70vh;         /* Keeps image from pushing past the screen height */
+  width: auto;              /* FIXES SQUISHING: forces natural aspect ratio width */
+  height: auto;             /* FIXES SQUISHING: forces natural aspect ratio height */
+  object-fit: contain;      /* Ensures image fits cleanly inside constraints */
+}
