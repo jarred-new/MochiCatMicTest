@@ -4,6 +4,7 @@ const calibrateButton = document.getElementById("calibrateButton");
 
 var maxLoud;
 let maxLoudKey = localStorage.getItem("maxLoud");
+
 if (maxLoudKey == null) {
   maxLoud = -24;
 } else {
