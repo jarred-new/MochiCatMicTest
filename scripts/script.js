@@ -1,5 +1,23 @@
 const levelHeader = document.getElementById("levelHeader");
 const cat = document.getElementById("cat");
+const calibrateButton = document.getElementById("calibrateButton");
+
+var maxLoud;
+let maxLoudKey = localStorage.getItem("maxLoud");
+if (maxLoudKey == null) {
+  maxLoud = -24;
+} else {
+  maxLoud = maxLoudKey;
+}
+
+function calibrate() {
+  let loudCalibrateVal = prompt("Enter dB to Calibrate (negative values only from -80 and above)", maxLoud);
+  
+  if (loudCalibrateVal != null) {
+    maxLoud = loudCalibrateVal;
+    localStorage.setItem("maxLoud", maxLoud);
+  }
+}
 
 async function startLoudnessMeter() {
   try {
@@ -41,7 +59,7 @@ async function startLoudnessMeter() {
       // rms scales linearly between 0 (silence) and roughly 0.707 (maximum sine wave loudness)
       dbFixed = db.toFixed(1);
       
-      if (dbFixed > -24) {
+      if (dbFixed > maxLoud) {
         cat.src = "img/loud.jpg";
       }
       else {
