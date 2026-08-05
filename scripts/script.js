@@ -7,6 +7,8 @@ var maxLoud;
 let maxLoudKey = localStorage.getItem("maxLoud");
 
 var dbFixed;
+var recordedAudioName = "recorded_audio";
+var recordedAudioNamekey = localStorage.getItem("recordedAudioName");
 //var dbCheck;
 
 function calibrate() {
@@ -185,7 +187,7 @@ function stopRecording() {
     audioBlob.name = 'recorded_audio.mp3';
     const downloadLink = document.createElement('a');
     downloadLink.href = audioUrl;
-    downloadLink.download = 'recorded_audio.mp3';
+    downloadLink.download = recordedAudioName + '.mp3';
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -222,6 +224,15 @@ function record() {
     stopRecording();
     recordButton.textContent = 'Record Mic';
     recordButton.setAttribute('data-pressed', 'false');
+  }
+}
+
+function changeRecordName() {
+  const newName = prompt('Enter new name for the recorded file (without extension):', recordedAudioName);
+  if (newName) {
+    recordedAudioName = newName;
+    localStorage.setItem('recordedAudioName', recordedAudioName);
+    alert(`Recorded file name changed to: ${recordedAudioName}.mp3`);
   }
 }
 
