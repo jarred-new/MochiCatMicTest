@@ -20,6 +20,18 @@ header {
   box-sizing: border-box;     /* Prevents padding from causing horizontal scroll */
 }
 
+.levelHeaderClassDiv {
+  display: flex; 
+  flex-direction: row; 
+  gap: 15px;
+}
+
+.levelHeaderPosClass {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .catClass {
   display: flex;            
   justify-content: center;  /* Centers horizontally */

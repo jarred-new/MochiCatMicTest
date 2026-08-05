@@ -3,13 +3,14 @@
 <html>
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="styles/style.css"/>
-  <title>Mochi Mic Loudness Checker</title>
+  <title>Mochi Cat Mic Test</title>
 </head>
 <body>
   <header>
     <h2>
-      Let me test your mic with my cat!
+      Let me test your mic with my cat, Mochi!
     </h2>
   </header>
   
@@ -22,16 +23,23 @@
   </main>
   
   <footer class="levelHeaderClass">
-    <div>
-      <h4 id="levelHeader">
+    <div class="levelHeaderClassDiv">
+      <h4 id="levelHeader" class="levelHeaderPosClass">
         Microphone Log...
       </h4>
       
       <button 
         id="calibrateButton" 
-        class="calibrateButtonClass"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
         onclick="calibrate();">
         Calibrate
+      </button>
+      
+      <button 
+        id="recordButton" 
+        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
+        onclick="record();">
+        Record Mic
       </button>
     </div>
   </footer>
