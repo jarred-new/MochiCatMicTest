@@ -1,55 +1,90 @@
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 7px;
-  background: #befefe;
-  z-index: 10;                /* Keeps header on top of the image */
-  box-sizing: border-box;     /* Prevents padding from causing horizontal scroll */
+:root{
+  --bg-a: #0f172a;
+  --bg-b: #071130;
+  --accent-start: #7ee8fa;
+  --accent-end: #5f72ff;
+  --glass: rgba(255,255,255,0.08);
+  --glass-strong: rgba(255,255,255,0.12);
+  --muted: rgba(255,255,255,0.75);
 }
 
-.levelHeaderClass {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 8px;
-  background: #befefe;
-  z-index: 10;                /* Keeps footer on top of the image */
-  box-sizing: border-box;     /* Prevents padding from causing horizontal scroll */
+*{box-sizing: border-box;}
+html,body{
+  height:100%;
+  margin:0;
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: linear-gradient(160deg,var(--bg-a),var(--bg-b));
+  color:var(--muted);
+  -webkit-font-smoothing:antialiased;
 }
 
-.levelHeaderClassDiv {
-  display: flex; 
-  flex-direction: row; 
-  gap: 15px;
+header{
+  position:fixed;
+  top:16px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:14px 22px;
+  border-radius:14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  backdrop-filter: blur(6px) saturate(120%);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  z-index:50;
 }
 
-.levelHeaderPosClass {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+header h2{margin:0;font-weight:600;letter-spacing:0.2px;color:#eef9ff}
+
+.levelHeaderClass{
+  position:fixed;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 40px);
+  max-width:980px;
+  padding:14px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  backdrop-filter: blur(8px) saturate(120%);
+  box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+  z-index:50;
 }
 
-.catClass {
-  display: flex;            
-  justify-content: center;  /* Centers horizontally */
-  align-items: center;      /* Centers vertically */
-  
-  width: 100%;              /* Takes full width of screen */
-  min-height: 100vh;        /* Spans full height of view */
-  box-sizing: border-box;
+.levelHeaderClassDiv{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.levelHeaderPosClass{flex:1;min-width:220px}
 
-  /* Padding keeps the cat image from hiding under your fixed bars */
-  padding-top: 50px;        
-  padding-bottom: 50px;     
+.catClass{
+  display:flex;justify-content:center;align-items:center;
+  width:100%;min-height:100vh;padding-top:80px;padding-bottom:120px;
 }
 
-img {
-  max-width: 90%;          /* Allows image to be wider on phone screens */
-  max-height: 70vh;         /* Keeps image from pushing past the screen height */
-  width: auto;              /* FIXES SQUISHING: forces natural aspect ratio width */
-  height: auto;             /* FIXES SQUISHING: forces natural aspect ratio height */
-  object-fit: contain;      /* Ensures image fits cleanly inside constraints */
+.cat-card{
+  display:inline-block;padding:18px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 30px 80px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
 }
+
+img{display:block;max-width:720px;width:90vw;max-height:70vh;height:auto;border-radius:14px;object-fit:cover;transition:transform .28s ease, box-shadow .28s ease}
+img:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 18px 40px rgba(95,114,255,0.18)}
+
+/* Buttons */
+button{cursor:pointer;border:0;padding:10px 14px;border-radius:999px;font-weight:600;transition:transform .18s ease, box-shadow .18s ease}
+button:active{transform:translateY(1px)}
+
+#calibrateButton{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#05203a;box-shadow:0 8px 20px rgba(127,134,255,0.16)}
+#recordButton{background:linear-gradient(90deg,#ff7aa2,#ff6a88);color:#fff;box-shadow:0 8px 20px rgba(255,106,136,0.12)}
+#recordNameChangeButton{background:linear-gradient(90deg,#7ef5c8,#2bd2aa);color:#053827;box-shadow:0 8px 20px rgba(46,209,162,0.12)}
+
+#calibrateButton:hover,#recordButton:hover,#recordNameChangeButton:hover{transform:translateY(-4px)}
+
+@media (max-width:600px){
+  header{left:12px;transform:none}
+  .levelHeaderClass{left:12px;right:12px;transform:none;width:auto}
+  .levelHeaderPosClass{min-width:0}
+}
+
+/* subtle floating animation for the card */
+@keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+.cat-card{animation:floaty 6s ease-in-out infinite}
+
+/* small helper for loud state - when JS toggles src, add a visual pulse */
+.loud-pulse{animation: pulse 0.9s ease-out}
+@keyframes pulse{0%{box-shadow:0 0 0 rgba(255,255,255,0)}50%{box-shadow:0 0 60px rgba(255,122,162,0.12)}100%{box-shadow:0 0 0 rgba(255,255,255,0)}}
