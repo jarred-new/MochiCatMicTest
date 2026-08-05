@@ -91,70 +91,137 @@ if (maxLoudKey == null) {
   maxLoud = maxLoudKey;
 }
 
-let mediaRecorder;
+// Recording: capture raw PCM and encode to MP3 client-side using lamejs
+let mediaStream;
 let audioChunks = [];
+let audioContextRecording = null;
+let sourceNode = null;
+let scriptNode = null;
+let mp3Encoder = null;
+let mp3Data = [];
+let isRecording = false;
+
+function loadLame() {
+  return new Promise((resolve, reject) => {
+    if (window.lamejs) return resolve(window.lamejs);
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/lamejs@1.2.0/lame.min.js';
+    s.onload = () => resolve(window.lamejs);
+    s.onerror = () => reject(new Error('Failed to load lamejs'));
+    document.head.appendChild(s);
+  });
+}
+
+function floatTo16BitPCM(float32Array) {
+  const l = float32Array.length;
+  const buf = new Int16Array(l);
+  for (let i = 0; i < l; i++) {
+    let s = Math.max(-1, Math.min(1, float32Array[i]));
+    buf[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+  }
+  return buf;
+}
 
 async function startRecording() {
   try {
+    await loadLame();
+
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaStream = stream;
 
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
+    audioContextRecording = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioContextRecording.createMediaStreamSource(stream);
 
-    // Collect data chunks as they become available
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        audioChunks.push(event.data);
+    const bufferSize = 4096;
+    scriptNode = audioContextRecording.createScriptProcessor(bufferSize, 1, 1);
+
+    // mono, sampleRate from context, 128kbps
+    mp3Encoder = new lamejs.Mp3Encoder(1, audioContextRecording.sampleRate, 128);
+    mp3Data = [];
+
+    scriptNode.onaudioprocess = function (e) {
+      if (!isRecording) return;
+      const input = e.inputBuffer.getChannelData(0);
+      const int16 = floatTo16BitPCM(input);
+      const mp3buf = mp3Encoder.encodeBuffer(int16);
+      if (mp3buf.length > 0) {
+        mp3Data.push(new Int8Array(mp3buf));
       }
     };
 
-    // Export and play/download the file when recording stops
-    mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
-      const audioUrl = URL.createObjectURL(audioBlob);
+    sourceNode.connect(scriptNode);
+    scriptNode.connect(audioContextRecording.destination);
 
-      // Example: Play the recorded audio in the browser
-      // const audio = new Audio(audioUrl);
-      // audio.play();
-
-      // Download the recorded audio file
-      audioBlob.name = "recorded_audio.mp3";
-      const downloadLink = document.createElement("a");
-      downloadLink.href = audioUrl;
-      downloadLink.download = "recorded_audio.mp3";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    };
-
-    mediaRecorder.start();
-    console.log("Recording started...");
+    isRecording = true;
+    console.log('Recording started (encoding to MP3)...');
   } catch (error) {
-    alert("Microphone access denied or error occurred:", error);
+    alert('Microphone access denied or error occurred: ' + error);
   }
 }
 
 function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-    // Stop all audio tracks to turn off the microphone hardware light
-    mediaRecorder.stream.getTracks().forEach((track) => track.stop());
-    console.log("Recording stopped.");
+  if (!isRecording) return;
+
+  isRecording = false;
+
+  try {
+    // finalize mp3
+    const mp3buf = mp3Encoder.flush();
+    if (mp3buf.length > 0) mp3Data.push(new Int8Array(mp3buf));
+
+    // concatenate
+    let length = 0;
+    for (let i = 0; i < mp3Data.length; i++) length += mp3Data[i].length;
+    const merged = new Uint8Array(length);
+    let offset = 0;
+    for (let i = 0; i < mp3Data.length; i++) {
+      merged.set(new Uint8Array(mp3Data[i].buffer), offset);
+      offset += mp3Data[i].length;
+    }
+
+    const audioBlob = new Blob([merged], { type: 'audio/mpeg' });
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    audioBlob.name = 'recorded_audio.mp3';
+    const downloadLink = document.createElement('a');
+    downloadLink.href = audioUrl;
+    downloadLink.download = 'recorded_audio.mp3';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    console.log('Recording stopped. MP3 ready.');
+  } catch (err) {
+    console.error('Error finalizing MP3:', err);
+    alert('Error while encoding MP3: ' + err);
+  } finally {
+    // clean up audio nodes and stop tracks
+    try {
+      if (scriptNode) {
+        scriptNode.disconnect();
+        scriptNode.onaudioprocess = null;
+      }
+      if (sourceNode) sourceNode.disconnect();
+      if (audioContextRecording) audioContextRecording.close();
+      if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop());
+    } catch (e) {
+      console.warn('Cleanup error:', e);
+    }
   }
 }
 
 // The record button onClick event
 function record() {
-  let pressed = recordButton.getAttribute("data-pressed") === "true";
+  let pressed = recordButton.getAttribute('data-pressed') === 'true';
 
   if (!pressed) {
     startRecording();
-    recordButton.textContent = "Stop Recording";
-    recordButton.setAttribute("data-pressed", "true");
+    recordButton.textContent = 'Stop Recording';
+    recordButton.setAttribute('data-pressed', 'true');
   } else {
     stopRecording();
-    recordButton.textContent = "Record Mic";
-    recordButton.setAttribute("data-pressed", "false");
+    recordButton.textContent = 'Record Mic';
+    recordButton.setAttribute('data-pressed', 'false');
   }
 }
 
